@@ -1,7 +1,7 @@
-from diffusers import StableDiffusionLatents2ImgPipeline
+from diffusers.pipelines.stable_diffusion.pipeline_stable_diffusion_latents2img import StableDiffusionLatents2ImgPipeline
 
 import torch
-import torchvision  
+import torchvision
 from torchvision import transforms
 
 import argparse
@@ -18,25 +18,25 @@ import ipdb
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--batch_size', default=10, type=int, 
+    parser.add_argument('--batch_size', default=10, type=int,
                         help='batch size')
-    parser.add_argument('--diffusion_checkpoints_path', default="/home-ext/tbw/suduo/D3M/stablediffusion/checkpoints/stable-diffusion-v1-5", type=str, 
+    parser.add_argument('--diffusion_checkpoints_path', default="/home-ext/tbw/suduo/D3M/stablediffusion/checkpoints/stable-diffusion-v1-5", type=str,
                         help='path to stable diffusion model from pretrained')
-    parser.add_argument('--dataset', default='cifar10', type=str, 
+    parser.add_argument('--dataset', default='cifar10', type=str,
                         help='data prepare to distillate')
-    parser.add_argument('--guidance_scale', '-g', default=8, type=float, 
+    parser.add_argument('--guidance_scale', '-g', default=8, type=float,
                         help='diffusers guidance_scale')
-    parser.add_argument('--ipc', default=1, type=int, 
+    parser.add_argument('--ipc', default=1, type=int,
                         help='image per class')
-    parser.add_argument('--km_expand', default=10, type=int, 
+    parser.add_argument('--km_expand', default=10, type=int,
                         help='expand ration for minibatch k-means model')
-    parser.add_argument('--label_file_path', default='/home-ext/tbw/suduo/data/imagenet_classes.txt', type=str, 
+    parser.add_argument('--label_file_path', default='/home-ext/tbw/suduo/data/imagenet_classes.txt', type=str,
                         help='root dir')
-    parser.add_argument('--prototype_path', default='/home-ext/tbw/suduo/D3M/prototypes/imagenet-ipc1-kmexpand1.json', type=str, 
+    parser.add_argument('--prototype_path', default='/home-ext/tbw/suduo/D3M/prototypes/imagenet-ipc1-kmexpand1.json', type=str,
                         help='prototype path')
-    parser.add_argument('--save_init_image_path', default='/home-ext/tbw/suduo/data/init_data/random', type=str, 
+    parser.add_argument('--save_init_image_path', default='/home-ext/tbw/suduo/data/init_data/random', type=str,
                         help='where to save the generated prototype json files')
-    parser.add_argument('--strength', '-s', default=0.75, type=float, 
+    parser.add_argument('--strength', '-s', default=0.75, type=float,
                         help='diffusers strength')
     args = parser.parse_args()
     return args
@@ -57,7 +57,7 @@ def gen_syn_images(pipe, prototypes, label_list, args):
     for prompt, pros in tqdm(prototypes.items(), total=len(prototypes), position=0):
 
         assert  args.ipc % pros.size(0) == 0
-        
+
         for j in range(int(args.ipc/(pros.size(0)))):
             for i in range(pros.size(0)):
                 sub_pro = pros[i:i+1]
@@ -87,5 +87,5 @@ def main():
     gen_syn_images(pipe=pipe, prototypes=prototypes, label_list=label_dic, args=args)
 
 
-if __name__ == "__main__" : 
+if __name__ == "__main__" :
     main()

@@ -1,9 +1,9 @@
-CUDA_VISIBLE_DEVICES=0 python gen_prototype.py \
+python gen_prototype.py \
     --batch_size 10 \
-    --data_dir ../data/imagenet \
+    --data_dir /data2/wlf/datasets/imagenet \
     --dataset imagenet \
-    --diffusion_checkpoints_path ../stablediffusion/checkpoints/stable-diffusion-v1-5 \
+    --diffusion_checkpoints_path jcplus/stable-diffusion-v1-5 \
     --ipc 10 \
     --km_expand 1 \
-    --label_file_path ./label-propmt/imagenet_classes.txt \
+    --label_file_path ./label-prompt/imagenet_classes.txt \
     --save_prototype_path ./prototypes

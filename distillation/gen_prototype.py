@@ -4,10 +4,10 @@ Author: Su Duo & Houjunjie
 Date: 2023.9.21
 '''
 
-from diffusers import StableDiffusionGenLatentsPipeline
+from diffusers.pipelines.stable_diffusion.pipeline_stable_diffusion_gen_latents import StableDiffusionGenLatentsPipeline
 
 import torch
-import torchvision  
+import torchvision
 from torchvision import transforms
 from torch.utils.data import DataLoader
 
@@ -24,25 +24,25 @@ import ipdb
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--batch_size', default=10, type=int, 
+    parser.add_argument('--batch_size', default=10, type=int,
                         help='batch size')
-    parser.add_argument('--data_dir', default='/home-ext/tbw/suduo/data/imagenet', type=str, 
+    parser.add_argument('--data_dir', default='/home-ext/tbw/suduo/data/imagenet', type=str,
                         help='root dir')
-    parser.add_argument('--dataset', default='imagenet', type=str, 
+    parser.add_argument('--dataset', default='imagenet', type=str,
                         help='data prepare to distillate:imagenet/tiny-imagenet')
-    parser.add_argument('--diffusion_checkpoints_path', default="/home-ext/tbw/suduo/D3M/stablediffusion/checkpoints/stable-diffusion-v1-5", type=str, 
+    parser.add_argument('--diffusion_checkpoints_path', default="/home-ext/tbw/suduo/D3M/stablediffusion/checkpoints/stable-diffusion-v1-5", type=str,
                         help='path to stable diffusion model from pretrained')
-    parser.add_argument('--ipc', default=1, type=int, 
+    parser.add_argument('--ipc', default=1, type=int,
                         help='image per class')
-    parser.add_argument('--km_expand', default=10, type=int, 
+    parser.add_argument('--km_expand', default=10, type=int,
                         help='expand ration for minibatch k-means model')
-    parser.add_argument('--label_file_path', default='/home-ext/tbw/suduo/data/imagenet_classes.txt', type=str, 
+    parser.add_argument('--label_file_path', default='/home-ext/tbw/suduo/data/imagenet_classes.txt', type=str,
                         help='root dir')
-    parser.add_argument('--num_workers', default=4, type=int, 
+    parser.add_argument('--num_workers', default=4, type=int,
                         help='number of workers')
-    parser.add_argument('--save_prototype_path', default='/home-ext/tbw/suduo/D3M/prototypes', type=str, 
+    parser.add_argument('--save_prototype_path', default='/home-ext/tbw/suduo/D3M/prototypes', type=str,
                         help='where to save the generated prototype json files')
-    parser.add_argument('--size', default=512, type=int, 
+    parser.add_argument('--size', default=512, type=int,
                         help='init resolution (resize)')
     args = parser.parse_args()
     return args
@@ -62,7 +62,7 @@ def prototype_kmeans(pipe, data_loader, label_list, km_models, args):
     latents = {}
     for label in label_list:
         latents[label] = []
-    
+
     for images, labels in tqdm(data_loader, total=len(data_loader), position=0):
         images = images.cuda(non_blocking=True)
         labels = labels.cuda(non_blocking=True)
@@ -112,7 +112,7 @@ def save_prototype(prototype, args):
 def main():
     args = parse_args()
     args.device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    
+
     # 1.obtain label-prompt list
     label_list = gen_label_list(args)
 
@@ -130,7 +130,7 @@ def main():
     # 5.generate prototypes and save them as json file
     prototype = gen_prototype(label_list, fitted_km)
     save_prototype(prototype, args)
-    
 
-if __name__ == "__main__" : 
+
+if __name__ == "__main__" :
     main()

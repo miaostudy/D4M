@@ -5,9 +5,9 @@ python train_FKD.py \
     -j 8 --gradient-accumulation-steps 2 \
     -T 20 \
     --mix-type 'cutmix' \
-    --wandb-api-key xxx \
-    --output-dir ./save/final_rn18_fkd/cifar10_ipc10_label18_train18 \
-    --train-dir ../data/distilled_data/cifar10_ipc10_10_s0.7_g8.0_kmexpand1 \
-    --val-dir ../data/imagenet/val \
-    --fkd-path ../matching/imagenet_ipc10_label18 \
-    --wandb-project imagenet_ipc10_label18  \
+    --wandb-api-key ceb6f265b99ab43eba47ae94afbbd639d54b3153 \
+    --output-dir ./save/final_rn18_fkd/tiny_imagenet_ipc10_label18_train18 \
+    --train-dir ../data/distilled_data/tiny_imagenet_ipc10_10_s0.7_g8.0_kmexpand1 \
+    --val-dir /data2/wlf/datasets/tiny-imagenet/val \
+    --fkd-path ../matching/tiny_imagenet_ipc10_label18 \
+    --wandb-project tiny_imagenet_ipc10_label18  \

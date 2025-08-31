@@ -18,7 +18,7 @@ from torch.optim.lr_scheduler import LambdaLR
 
 from utils import AverageMeter, accuracy, get_parameters
 sys.path.append('..')
-from relabel.utils_fkd import ImageFolder_FKD_MIX, ComposeWithCoords, RandomResizedCropWithCoords, RandomHorizontalFlipWithRes, mix_aug
+from matching.utils_fkd import ImageFolder_FKD_MIX, ComposeWithCoords, RandomResizedCropWithCoords, RandomHorizontalFlipWithRes, mix_aug
 
 # It is imported for you to access and modify the PyTorch source code (via Ctrl+Click), more details in README.md
 from torch.utils.data._utils.fetch import _MapDatasetFetcher

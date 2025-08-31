@@ -1,4 +1,5 @@
-from diffusers.pipelines.stable_diffusion.pipeline_stable_diffusion_latents2img import StableDiffusionLatents2ImgPipeline
+from diffusers.pipelines.stable_diffusion.pipeline_stable_diffusion_latents2img import \
+    StableDiffusionLatents2ImgPipeline
 
 import torch
 import torchvision
@@ -15,12 +16,12 @@ from dataset_utils import *
 import ipdb
 
 
-
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--batch_size', default=10, type=int,
                         help='batch size')
-    parser.add_argument('--diffusion_checkpoints_path', default="/home-ext/tbw/suduo/D3M/stablediffusion/checkpoints/stable-diffusion-v1-5", type=str,
+    parser.add_argument('--diffusion_checkpoints_path',
+                        default="/home-ext/tbw/suduo/D3M/stablediffusion/checkpoints/stable-diffusion-v1-5", type=str,
                         help='path to stable diffusion model from pretrained')
     parser.add_argument('--dataset', default='cifar10', type=str,
                         help='data prepare to distillate')
@@ -32,7 +33,8 @@ def parse_args():
                         help='expand ration for minibatch k-means model')
     parser.add_argument('--label_file_path', default='/home-ext/tbw/suduo/data/imagenet_classes.txt', type=str,
                         help='root dir')
-    parser.add_argument('--prototype_path', default='/home-ext/tbw/suduo/D3M/prototypes/imagenet-ipc1-kmexpand1.json', type=str,
+    parser.add_argument('--prototype_path', default='/home-ext/tbw/suduo/D3M/prototypes/imagenet-ipc1-kmexpand1.json',
+                        type=str,
                         help='prototype path')
     parser.add_argument('--save_init_image_path', default='/home-ext/tbw/suduo/data/init_data/random', type=str,
                         help='where to save the generated prototype json files')
@@ -56,17 +58,22 @@ def load_prototype(args):
 def gen_syn_images(pipe, prototypes, label_list, args):
     for prompt, pros in tqdm(prototypes.items(), total=len(prototypes), position=0):
 
-        assert  args.ipc % pros.size(0) == 0
+        assert args.ipc % pros.size(0) == 0
 
-        for j in range(int(args.ipc/(pros.size(0)))):
+        for j in range(int(args.ipc / (pros.size(0)))):
             for i in range(pros.size(0)):
-                sub_pro = pros[i:i+1]
-                sub_pro_random = torch.randn((1, 4, 64, 64), device='cuda',dtype=torch.half)
-                images = pipe(prompt=prompt, latents=sub_pro, negative_prompt='cartoon, anime, painting', is_init=True, strength=args.strength, guidance_scale=args.guidance_scale).images
+                sub_pro = pros[i:i + 1]
+                sub_pro_random = torch.randn((1, 4, 64, 64), device='cuda', dtype=torch.half)
+                images = pipe(prompt=prompt, latents=sub_pro, negative_prompt='cartoon, anime, painting', is_init=True,
+                              strength=args.strength, guidance_scale=args.guidance_scale).images
                 index = label_list.index(prompt)
-                save_path = os.path.join(args.save_init_image_path, "{}_ipc{}_{}_s{}_g{}_kmexpand{}".format(args.dataset, int(pros.size(0)), args.ipc, args.strength, args.guidance_scale, args.km_expand))
+                save_path = os.path.join(args.save_init_image_path,
+                                         "{}_ipc{}_{}_s{}_g{}_kmexpand{}".format(args.dataset, int(pros.size(0)),
+                                                                                 args.ipc, args.strength,
+                                                                                 args.guidance_scale, args.km_expand))
                 os.makedirs(os.path.join(save_path, "{}/".format(index)), exist_ok=True)
-                images[0].resize((224, 224)).save(os.path.join(save_path, "{}/{}-image{}{}.png".format(index, index, i, j)))
+                images[0].resize((224, 224)).save(
+                    os.path.join(save_path, "{}/{}-image{}{}.png".format(index, index, i, j)))
 
 
 def main():
@@ -77,7 +84,8 @@ def main():
     label_dic = gen_label_list(args)
 
     # 2.define the diffusers pipeline
-    pipe = StableDiffusionLatents2ImgPipeline.from_pretrained(args.diffusion_checkpoints_path, torch_dtype=torch.float16)
+    pipe = StableDiffusionLatents2ImgPipeline.from_pretrained(args.diffusion_checkpoints_path,
+                                                              torch_dtype=torch.float16, safety_checker=None)
     pipe = pipe.to(args.device)
 
     # 3.load prototypes from json file
@@ -87,5 +95,5 @@ def main():
     gen_syn_images(pipe=pipe, prototypes=prototypes, label_list=label_dic, args=args)
 
 
-if __name__ == "__main__" :
+if __name__ == "__main__":
     main()

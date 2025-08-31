@@ -153,3 +153,10 @@ If you find this work helpful, please cite:
     pages     = {5809-5818}
 }
 ```
+
+
+hf-models/stable-diffusion-v1-5: NSFW
+stable-diffusion-v1-5/stable-diffusion-v1-5: NSFW
+rupeshs/LCM-runwayml-stable-diffusion-v1-5: weird
+jcplus/stable-diffusion-v1-5: unsafe NSFW
+ZeroCool94/stable-diffusion-v1-5: unsafe NSFW

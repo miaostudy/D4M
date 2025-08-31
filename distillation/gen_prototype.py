@@ -120,7 +120,7 @@ def main():
     trainloader, _ = load_dataset(args)
 
     # 3.define the diffusers pipeline
-    pipe = StableDiffusionGenLatentsPipeline.from_pretrained(args.diffusion_checkpoints_path, torch_dtype=torch.float16)
+    pipe = StableDiffusionGenLatentsPipeline.from_pretrained(args.diffusion_checkpoints_path, torch_dtype=torch.float16, safety_checker=None)
     pipe = pipe.to(args.device)
 
     # 4.initialize & run partial k-means model each class

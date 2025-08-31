@@ -10,4 +10,4 @@ python train_FKD.py \
     --train-dir ../data/distilled_data/tiny_imagenet_ipc10_10_s0.7_g8.0_kmexpand1 \
     --val-dir /data2/wlf/datasets/tiny-imagenet/val \
     --fkd-path ../matching/tiny_imagenet_ipc10_label18 \
-    --wandb-project tiny_imagenet_ipc10_label18  \
+    --wandb-project tiny_imagenet_ipc10_label18

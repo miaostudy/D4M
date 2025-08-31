@@ -97,9 +97,9 @@ def get_FKD_info(fkd_path):
     batch_list = sorted(os.listdir(os.path.join(
         fkd_path, 'epoch_0')), key=custom_sort_key)
     batch_size = torch.load(os.path.join(
-        fkd_path, 'epoch_0', batch_list[0]))[1].size()[0]
+        fkd_path, 'epoch_0', batch_list[0]), weights_only=False )[1].size()[0]
     last_batch_size = torch.load(os.path.join(
-        fkd_path, 'epoch_0', batch_list[-1]))[1].size()[0]
+        fkd_path, 'epoch_0', batch_list[-1]), weights_only=False )[1].size()[0]
     num_img = batch_size * (len(batch_list) - 1) + last_batch_size
 
     print('======= FKD: dataset info ======')

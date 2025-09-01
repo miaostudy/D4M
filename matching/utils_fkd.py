@@ -167,7 +167,7 @@ class ImageFolder_FKD_MIX(torchvision.datasets.ImageFolder):
         assert self.epoch != None
         batch_idx = self.img2batch_idx_list[self.epoch][img_idx]
         batch_config_path =  os.path.join(self.fkd_path, 'epoch_{}'.format(self.epoch), 'batch_{}.tar'.format(batch_idx))
-        config = torch.load(batch_config_path)
+        config = torch.load(batch_config_path, weights_only=False)
         self.batch_config_idx = 0
         self.batch_config = config[:2]
         return config[2:]

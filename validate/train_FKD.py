@@ -280,6 +280,10 @@ def validate(model, args, epoch=None):
 
     model.eval()
     t1  = time.time()
+
+    all_probs = []
+    all_labels = []
+
     with torch.no_grad():
         for data, target in args.val_loader:
             target = target.type(torch.LongTensor)
@@ -288,11 +292,49 @@ def validate(model, args, epoch=None):
             output = model(data)
             loss = loss_function(output, target)
 
+            # 计算概率分布
+            probs = F.softmax(output, dim=1)
+            all_probs.append(probs.cpu().numpy())
+            all_labels.append(target.cpu().numpy())
+
             prec1, prec5 = accuracy(output, target, topk=(1, 5))
             n = data.size(0)
             objs.update(loss.item(), n)
             top1.update(prec1.item(), n)
             top5.update(prec5.item(), n)
+
+            if len(all_probs) == 1:
+                for i in range(min(5, len(probs))):
+                    print(f"样本 {i+1} (真实标签: {target[i]})")
+                    top5_probs, top5_indices = torch.topk(probs[i], len(probs[i]))
+                    for p, idx in zip(top5_probs, top5_indices):
+                        print(f"  类别 {idx}: {p.item():.4f}")
+                print()
+
+    all_probs = np.concatenate(all_probs, axis=0)
+    all_labels = np.concatenate(all_labels, axis=0)
+
+    class_avg_probs = np.mean(all_probs, axis=0)
+    print("类别平均概率 (前10个类别):")
+    for i in range(min(10, len(class_avg_probs))):
+        print(f"类别 {i}: {class_avg_probs[i]:.6f}")
+
+    predictions = np.argmax(all_probs, axis=1)
+    correct_mask = (predictions == all_labels)
+
+    if np.sum(correct_mask) > 0:
+        correct_probs = all_probs[correct_mask]
+        correct_avg = np.mean(correct_probs, axis=0)
+        print("\n正确预测的平均概率 (前10个类别):")
+        for i in range(min(10, len(correct_avg))):
+            print(f"类别 {i}: {correct_avg[i]:.6f}")
+
+    if np.sum(~correct_mask) > 0:
+        incorrect_probs = all_probs[~correct_mask]
+        incorrect_avg = np.mean(incorrect_probs, axis=0)
+        print("\n错误预测的平均概率 (前10个类别):")
+        for i in range(min(10, len(incorrect_avg))):
+            print(f"类别 {i}: {incorrect_avg[i]:.6f}")
 
     logInfo = 'TEST Iter {}: loss = {:.6f},\t'.format(epoch, objs.avg) + \
               'Top-1 err = {:.6f},\t'.format(100 - top1.avg) + \

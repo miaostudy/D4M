@@ -8,7 +8,7 @@ python generate_soft_label.py \
     --min-scale-crops 0.08 \
     --max-scale-crops 1 \
     --use-fp16 \
-    --fkd-path tiny_imagenet_ipc10_label18 \
+    --fkd-path tiny_imagenet_ipc50_label18 \
     --mode 'fkd_save' \
     --mix-type 'cutmix' \
-    --data ../data/distilled_data/tiny_imagenet_ipc10_10_s0.7_g8.0_kmexpand1 \
+    --data ../data/distilled_data/tiny_imagenet_ipc50_10_s0.7_g8.0_kmexpand1 \

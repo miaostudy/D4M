@@ -6,8 +6,8 @@ python train_FKD.py \
     -T 20 \
     --mix-type 'cutmix' \
     --wandb-api-key ceb6f265b99ab43eba47ae94afbbd639d54b3153 \
-    --output-dir ./save/final_rn18_fkd/tiny_imagenet_ipc10_label18_train18 \
-    --train-dir ../data/distilled_data/tiny_imagenet_ipc10_10_s0.7_g8.0_kmexpand1 \
+    --output-dir ./save/final_rn18_fkd/tiny_imagenet_ipc50_label18_train18 \
+    --train-dir ../data/distilled_data/tiny_imagenet_ipc50_50_s0.7_g8.0_kmexpand1 \
     --val-dir /data2/wlf/datasets/tiny-imagenet/val \
-    --fkd-path ../matching/tiny_imagenet_ipc10_label18 \
-    --wandb-project tiny_imagenet_ipc10_label18
+    --fkd-path ../matching/tiny_imagenet_ipc50_label18 \
+    --wandb-project tiny_imagenet_ipc50_label18

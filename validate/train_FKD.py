@@ -20,9 +20,6 @@ from utils import AverageMeter, accuracy, get_parameters
 sys.path.append('..')
 from matching.utils_fkd import ImageFolder_FKD_MIX, ComposeWithCoords, RandomResizedCropWithCoords, RandomHorizontalFlipWithRes, mix_aug
 
-# It is imported for you to access and modify the PyTorch source code (via Ctrl+Click), more details in README.md
-from torch.utils.data._utils.fetch import _MapDatasetFetcher
-
 def get_args():
     parser = argparse.ArgumentParser("FKD Training on ImageNet-1K")
     parser.add_argument('--batch-size', type=int,
@@ -292,7 +289,6 @@ def validate(model, args, epoch=None):
             output = model(data)
             loss = loss_function(output, target)
 
-            # 计算概率分布
             probs = F.softmax(output, dim=1)
             all_probs.append(probs.cpu().numpy())
             all_labels.append(target.cpu().numpy())

@@ -81,6 +81,7 @@ def main():
     args.device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     # 1.obtain label-prompt list
+    # [class1, class2, .....], 形状(n_classes)
     label_dic = gen_label_list(args)
 
     # 2.define the diffusers pipeline

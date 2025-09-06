@@ -130,7 +130,8 @@ def main_worker(gpu, ngpus_per_node, args):
                                 world_size=args.world_size, rank=args.rank)
     print("=> using pytorch pre-trained model '{}'".format(args.arch))
     model = models.__dict__[args.arch](weights='DEFAULT')
-
+    in_features = model.fc.in_features
+    model.fc = torch.nn.Linear(in_features, 200)
 
     if not torch.cuda.is_available():
         print('using CPU, this will be slow')

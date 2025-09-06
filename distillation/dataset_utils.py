@@ -12,7 +12,7 @@ import torchvision.datasets as datasets
 import torchvision.transforms as transforms
 from torchvision.utils import save_image, make_grid
 
-
+# ImageFolder加载数据，没有做数据增强
 def load_dataset(args):
     # Obtain dataloader
     transform_train = transforms.Compose([
@@ -55,7 +55,7 @@ def load_dataset(args):
         ])
         trainset = datasets.ImageFolder(root=args.data_dir + "/train",
                                         transform=transform_train)
-        # 这里需要
+        # 这里用的ImageFolder, 所以验证集格式要改
         testset = datasets.ImageFolder(root=args.data_dir + "/val",
                                        transform=transform_train)
 
@@ -107,7 +107,7 @@ def gen_label_list(args):
     labels = []
     for line in lines:
         line = line.strip()
-        label = line.split('\t')[0]
+        label = line.split('\t')[0] # 这几个数据集都不是\t隔开，用不到这个
         labels.append(label)
 
     return labels

@@ -71,7 +71,7 @@ EXAMPLE_DOC_STRING = """
         ```
 """
 
-
+# tensor直接返回,PIL转成列表调一下大小归一化转成tensor后返回
 def preprocess(image):
     deprecation_message = "The preprocess method is deprecated and will be removed in diffusers 1.0.0. Please use VaeImageProcessor.preprocess(...) instead"
     deprecate("preprocess", "1.0.0", deprecation_message, standard_warn=False)
@@ -131,6 +131,7 @@ class StableDiffusionGenLatentsPipeline(
     """
     _optional_components = ["safety_checker", "feature_extractor"]
 
+    # 不用管，标准流程，处理各种弃用、版本、加载模型
     def __init__(
         self,
         vae: AutoencoderKL,
@@ -486,6 +487,7 @@ class StableDiffusionGenLatentsPipeline(
             extra_step_kwargs["generator"] = generator
         return extra_step_kwargs
 
+    # 检查合法性的，不管
     def check_inputs(
         self, prompt, strength, callback_steps, negative_prompt=None, prompt_embeds=None, negative_prompt_embeds=None
     ):
@@ -525,6 +527,7 @@ class StableDiffusionGenLatentsPipeline(
                     f" got: `prompt_embeds` {prompt_embeds.shape} != `negative_prompt_embeds`"
                     f" {negative_prompt_embeds.shape}."
                 )
+
 
     def get_timesteps(self, num_inference_steps, strength, device):
         # get the original timestep using init_timestep

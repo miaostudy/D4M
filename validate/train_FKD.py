@@ -139,6 +139,8 @@ def main():
     # load student model
     print("=> loading student model '{}'".format(args.model))
     model = torchvision.models.__dict__[args.model](weights=None)
+    in_features = model.fc.in_features
+    model.fc = torch.nn.Linear(in_features, 200)
     model = nn.DataParallel(model).cuda()
     model.train()
 

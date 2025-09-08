@@ -11,4 +11,4 @@ python generate_soft_label.py \
     --fkd-path tiny_imagenet_ipc50_label18 \
     --mode 'fkd_save' \
     --mix-type 'cutmix' \
-    --data ../data/distilled_data/tiny_imagenet_ipc50_10_s0.7_g8.0_kmexpand1 \
+    --data ../data/distilled_data/tiny_imagenet_ipc50_50_s0.7_g8.0_kmexpand1 \

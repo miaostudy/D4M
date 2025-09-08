@@ -72,6 +72,7 @@ def gen_syn_images(pipe, prototypes, label_list, args):
                                                                                  args.ipc, args.strength,
                                                                                  args.guidance_scale, args.km_expand))
                 os.makedirs(os.path.join(save_path, "{}/".format(index)), exist_ok=True)
+                print(images[0].shape)
                 images[0].resize((224, 224)).save(
                     os.path.join(save_path, "{}/{}-image{}{}.png".format(index, index, i, j)))
 

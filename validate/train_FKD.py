@@ -140,7 +140,7 @@ def main():
     print("=> loading student model '{}'".format(args.model))
     model = torchvision.models.__dict__[args.model](weights=None)
     in_features = model.fc.in_features
-    model.fc = torch.nn.Linear(in_features, 200)
+    model.fc = torch.nn.Linear(in_features, 200)#to do
     model = nn.DataParallel(model).cuda()
     model.train()
 
@@ -206,6 +206,9 @@ def train(model, args, epoch=None):
     objs = AverageMeter()
     top1 = AverageMeter()
     top5 = AverageMeter()
+    # 新增：用于跟踪软标签与真实标签的匹配度
+    label_match_rate = AverageMeter()  # 软标签最高概率类别与真实标签的匹配率
+    avg_max_prob = AverageMeter()  # 软标签最高概率的平均值
 
     optimizer = args.optimizer
     scheduler = args.scheduler
@@ -214,6 +217,10 @@ def train(model, args, epoch=None):
     model.train()
     t1 = time.time()
     args.train_loader.dataset.set_epoch(epoch)
+
+    # 控制验证频率，避免过多打印
+    validate_frequency = max(1, len(args.train_loader) // 10)  # 每个epoch验证10次
+
     for batch_idx, batch_data in enumerate(args.train_loader):
         images, target, flip_status, coords_status = batch_data[0]
         mix_index, mix_lam, mix_bbox, soft_label = batch_data[1:]
@@ -222,6 +229,33 @@ def train(model, args, epoch=None):
         target = target.cuda()
         soft_label = soft_label.cuda().float()  # convert to float32
         images, _, _, _ = mix_aug(images, args, mix_index, mix_lam, mix_bbox)
+
+        # 软标签与真实标签匹配度验证
+        if batch_idx % validate_frequency == 0:
+            # 计算软标签的概率分布
+            soft_label_probs = F.softmax(soft_label, dim=1)
+            # 找到每个样本概率最高的类别
+            max_probs, max_indices = torch.max(soft_label_probs, dim=1)
+            # 计算与真实标签的匹配率
+            match = (max_indices == target).float().mean() * 100
+            # 更新统计指标
+            label_match_rate.update(match.item(), target.size(0))
+            avg_max_prob.update(max_probs.mean().item(), target.size(0))
+
+            # 打印验证信息
+            print(f"\n批次 {batch_idx} 软标签验证:")
+            print(f"  软标签与真实标签匹配率: {match.item():.2f}%")
+            print(f"  软标签平均最大概率: {max_probs.mean().item():.4f}")
+
+            # 随机检查3个样本
+            sample_indices = np.random.choice(target.size(0), min(3, target.size(0)), replace=False)
+            for i in sample_indices:
+                print(f"\n  样本 {i} 真实标签: {target[i].item()}")
+                print(f"  软标签最高概率类别: {max_indices[i].item()}, 概率: {max_probs[i].item():.4f}")
+                # 显示前3高概率的类别
+                top3_probs, top3_indices = torch.topk(soft_label_probs[i], 3)
+                for p, idx in zip(top3_probs, top3_indices):
+                    print(f"    类别 {idx.item()}: {p.item():.4f}")
 
         optimizer.zero_grad()
         assert args.batch_size % args.gradient_accumulation_steps == 0
@@ -241,9 +275,12 @@ def train(model, args, epoch=None):
             output = model(partial_images)
             prec1, prec5 = accuracy(output, partial_target, topk=(1, 5))
 
-            output = F.log_softmax(output/args.temperature, dim=1)
-            partial_soft_label = F.softmax(partial_soft_label/args.temperature, dim=1)
-            loss = loss_function_kl(output, partial_soft_label)
+            output = F.log_softmax(output / args.temperature, dim=1)
+            partial_soft_label = F.softmax(partial_soft_label / args.temperature, dim=1)
+            loss = loss_function_kl(output, partial_sof8877999999999
+            `1`1
+            `11`0!~``````````````````````1#t_label)
+            
             loss = loss / args.gradient_accumulation_steps
             loss.backward()
 
@@ -254,19 +291,23 @@ def train(model, args, epoch=None):
 
         optimizer.step()
 
-
+    # 记录整个epoch的软标签验证指标
     metrics = {
         "train/loss": objs.avg,
         "train/Top1": top1.avg,
         "train/Top5": top5.avg,
-        }
+        "train/soft_label_match_rate": label_match_rate.avg,  # 新增
+        "train/soft_label_avg_max_prob": avg_max_prob.avg  # 新增
+    }
     wandb_metrics.update(metrics)
-
 
     printInfo = 'TRAIN Iter {}: lr = {:.6f},\tloss = {:.6f},\t'.format(epoch, scheduler.get_last_lr()[0], objs.avg) + \
                 'Top-1 err = {:.6f},\t'.format(100 - top1.avg) + \
                 'Top-5 err = {:.6f},\t'.format(100 - top5.avg) + \
-                'train_time = {:.6f}'.format((time.time() - t1))
+                '软标签匹配率 = {:.2f}%\t'.format(label_match_rate.avg) + \
+    'train_time = {:.6f}'.format((time.time() - t1))
+
+
     print(printInfo)
     t1 = time.time()
 
@@ -301,38 +342,38 @@ def validate(model, args, epoch=None):
             top1.update(prec1.item(), n)
             top5.update(prec5.item(), n)
 
-            if len(all_probs) == 1:
-                for i in range(min(5, len(probs))):
-                    print(f"样本 {i+1} (真实标签: {target[i]})")
-                    top5_probs, top5_indices = torch.topk(probs[i], len(probs[i]))
-                    for p, idx in zip(top5_probs, top5_indices):
-                        print(f"  类别 {idx}: {p.item():.4f}")
-                print()
+            # if len(all_probs) == 1:
+            #     for i in range(min(5, len(probs))):
+            #         print(f"样本 {i+1} (真实标签: {target[i]})")
+            #         top5_probs, top5_indices = torch.topk(probs[i], len(probs[i]))
+            #         for p, idx in zip(top5_probs, top5_indices):
+            #             print(f"  类别 {idx}: {p.item():.4f}")
+            #     print()
 
     all_probs = np.concatenate(all_probs, axis=0)
     all_labels = np.concatenate(all_labels, axis=0)
 
-    class_avg_probs = np.mean(all_probs, axis=0)
-    print("类别平均概率 (前10个类别):")
-    for i in range(min(10, len(class_avg_probs))):
-        print(f"类别 {i}: {class_avg_probs[i]:.6f}")
+    # class_avg_probs = np.mean(all_probs, axis=0)
+    # print("类别平均概率 (前10个类别):")
+    # for i in range(min(10, len(class_avg_probs))):
+    #     print(f"类别 {i}: {class_avg_probs[i]:.6f}")
 
-    predictions = np.argmax(all_probs, axis=1)
-    correct_mask = (predictions == all_labels)
+    # predictions = np.argmax(all_probs, axis=1)
+    # correct_mask = (predictions == all_labels)
 
-    if np.sum(correct_mask) > 0:
-        correct_probs = all_probs[correct_mask]
-        correct_avg = np.mean(correct_probs, axis=0)
-        print("\n正确预测的平均概率 (前10个类别):")
-        for i in range(min(10, len(correct_avg))):
-            print(f"类别 {i}: {correct_avg[i]:.6f}")
+    # if np.sum(correct_mask) > 0:
+    #     correct_probs = all_probs[correct_mask]
+    #     correct_avg = np.mean(correct_probs, axis=0)
+    #     print("\n正确预测的平均概率 (前10个类别):")
+    #     for i in range(min(10, len(correct_avg))):
+    #         print(f"类别 {i}: {correct_avg[i]:.6f}")
 
-    if np.sum(~correct_mask) > 0:
-        incorrect_probs = all_probs[~correct_mask]
-        incorrect_avg = np.mean(incorrect_probs, axis=0)
-        print("\n错误预测的平均概率 (前10个类别):")
-        for i in range(min(10, len(incorrect_avg))):
-            print(f"类别 {i}: {incorrect_avg[i]:.6f}")
+    # if np.sum(~correct_mask) > 0:
+    #     incorrect_probs = all_probs[~correct_mask]
+    #     incorrect_avg = np.mean(incorrect_probs, axis=0)
+    #     print("\n错误预测的平均概率 (前10个类别):")
+    #     for i in range(min(10, len(incorrect_avg))):
+    #         print(f"类别 {i}: {incorrect_avg[i]:.6f}")
 
     logInfo = 'TEST Iter {}: loss = {:.6f},\t'.format(epoch, objs.avg) + \
               'Top-1 err = {:.6f},\t'.format(100 - top1.avg) + \
